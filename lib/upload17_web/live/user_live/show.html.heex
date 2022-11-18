@@ -12,6 +12,10 @@
   <:item title="Name"><%= @user.name %></:item>
 </.list>
 
+<%= for photo_url <- (@user.photo_urls || []) do %>
+  <img class="w-[40%] inline-block p-4 shadow rounded" src={photo_url} />
+<% end %>
+
 <.back navigate={~p"/people"}>Back to people</.back>
 
 <.modal :if={@live_action == :edit} id="user-modal" show on_cancel={JS.patch(~p"/people/#{@user}")}>

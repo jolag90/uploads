@@ -115,13 +115,9 @@ defmodule Upload17Web.UserLive.FormComponent do
             File.cp!(path, dest)
             {:ok, ~p"/uploads/#{Path.basename(dest)}"}
           end)
+            |> IO.inspect
 
-        urls = uploaded_files |> Enum.map( fn {:ok, path} -> path
-          _ -> nil
-        end)
-
-        People.update_user(user, %{ photo_urls: urls})
-        |> IO.inspect(label: "CONTINUE HERE")
+        People.update_user(user, %{photo_urls: uploaded_files})
 
         {:noreply,
          socket

@@ -5,7 +5,7 @@ defmodule Upload17Web.UserLive.Index do
   alias Upload17.People.User
 
   @impl true
-  def mount(params, _session, socket) do
+  def mount(_params, _session, socket) do
     {:ok,
      socket
      |> assign(:people, list_people())
@@ -15,7 +15,7 @@ defmodule Upload17Web.UserLive.Index do
   end
 
   @impl true
-  def handle_params(params, url, socket) do
+  def handle_params(params, _url, socket) do
     # IO.inspect(url, label: "HANDLE PARAMS URL")
     # IO.inspect(params, label: "\n\n###PARAMS###")
     # IO.inspect(socket.assigns, label: "\n\n###SOCKET.ASSIGNS###")

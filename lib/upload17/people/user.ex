@@ -12,7 +12,7 @@ defmodule Upload17.People.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:name])
+    |> cast(attrs, [:name,:photo_urls])
     |> validate_required([:name])
   end
 end
