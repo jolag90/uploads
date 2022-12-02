@@ -4,7 +4,7 @@ defmodule Upload17.People.User do
 
   schema "people" do
     field :name, :string
-    field :photo_urls, {:array, :string}
+    field :photo_urls, {:array, :string}, default: []
 
     timestamps()
   end

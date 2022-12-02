@@ -8,7 +8,11 @@
 </.header>
 
 <.table id="people" rows={@people} row_click={&JS.navigate(~p"/people/#{&1}")}>
-  <:col :let={user} label="Photos"><%= inspect user.photo_urls %></:col>
+  <:col :let={user} label="Photos">
+    <%= for photo_url <- (user.photo_urls || [] )do%>
+      <img class="w-[40%] inline-block p-4 shadow rounded" src={photo_url} />
+    <% end %>
+  </:col>
   <:col :let={user} label="Name"><%= user.name %></:col>
   <:action :let={user}>
     <div class="sr-only">
@@ -17,7 +21,8 @@
     <.link patch={~p"/people/#{user}/edit"}>Edit</.link>
   </:action>
   <:action :let={user}>
-    <.link phx-click={JS.push("delete", value: %{id: user.id})} data-confirm="Are you sure?">
+    <.link phx-click={JS.push("delete", value: %{id: user.id})} data-confirm="Are you sure?
+All files of this user will be deleted">
       Delete
     </.link>
   </:action>

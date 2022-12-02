@@ -4,7 +4,7 @@ defmodule Upload17.Repo.Migrations.CreatePeople do
   def change do
     create table(:people) do
       add :name, :string
-      add :photo_urls, {:array, :string}
+      add :photo_urls, {:array, :string}, default: []
 
       timestamps()
     end
