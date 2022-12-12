@@ -3,11 +3,12 @@ defmodule Upload17Web.UserLive.Index do
 
   alias Upload17.People
   alias Upload17.People.User
+  alias Upload17Web.UserLive.FileManager
 
-  @static_path "priv/static"
   @max_entries 4
-  @max_file_size 10_000_000 #in bytes
-  @accept_files ~w/.jpeg .jpg .png/
+  # in bytes
+  @max_file_size 10_000_000
+  @accept_files ~w/.jpeg .jpg .png .mp4/
 
   @impl true
   def mount(_params, _session, socket) do
@@ -28,6 +29,21 @@ defmodule Upload17Web.UserLive.Index do
      |> apply_max_uploads()}
   end
 
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    user = People.get_user!(id)
+
+    FileManager.file_remove(user.photo_urls)
+
+    People.delete_user(user)
+    {:noreply, assign(socket, :people, list_people())}
+  end
+
+  @impl true
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
+  end
+
   defp apply_max_uploads(socket) do
     user = socket.assigns.user
 
@@ -39,7 +55,11 @@ defmodule Upload17Web.UserLive.Index do
       end
 
     socket
-    |> allow_upload(:photo, accept: @accept_files, max_entries: max_uploads, max_file_size: @max_file_size)
+    |> allow_upload(:photo,
+      accept: @accept_files,
+      max_entries: max_uploads,
+      max_file_size: @max_file_size
+    )
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -60,21 +80,6 @@ defmodule Upload17Web.UserLive.Index do
     |> assign(:user, nil)
   end
 
-  @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    user = People.get_user!(id)
-
-    file_remove(user.photo_urls)
-
-    People.delete_user(user)
-    {:noreply, assign(socket, :people, list_people())}
-  end
-
-  @impl true
-  def handle_event("validate", _params, socket) do
-    {:noreply, socket}
-  end
-
   defp list_people do
     People.list_people()
   end
@@ -83,14 +88,6 @@ defmodule Upload17Web.UserLive.Index do
   defp max_uploads(entries, user) when entries >= 1, do: @max_entries - length(user.photo_urls)
 
   # 1993 is a random number to symbolize that the upload limit is reached, because allow_upload.max_entries requires a positive integer
-  # Usage in FormComponent.render right before .live_file_input
+  # Usage in Edit.html.heex.render right before .live_file_input
   defp max_uploads(entries, _user) when entries < 1, do: 1993
-
-  def file_remove(photo_urls) when is_list(photo_urls) do
-    for photos <- photo_urls do
-      File.rm!(Path.expand(@static_path) <> photos)
-    end
-  end
-
-  def file_remove(_), do: nil
 end

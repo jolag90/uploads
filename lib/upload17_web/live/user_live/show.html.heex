@@ -13,14 +13,29 @@
 </.list>
 
 <%= for photo_url <- (@user.photo_urls || []) do %>
-  <img class="w-[40%] inline-block p-4 shadow rounded" src={photo_url} />
+  <%= case Upload17Web.UserLive.FileManager.exttype(photo_url) do %>
+    <% {:pic, image} -> %>
+      <article class="upload-entry w-[40%] inline-block">
+        <img src={image} />
+      </article>
+    <% {:vid, video} -> %>
+      <video width="320" height="240" controls>
+        <source src={video} tpye="video/mp4" />
+      </video>
+    <% {:error, unknown_type} -> %>
+      <div class="error">
+        <p>Unknown file type</p>
+        <br />
+        <%= unknown_type %>
+      </div>
+  <% end %>
 <% end %>
 
 <.back navigate={~p"/people"}>Back to people</.back>
 
 <.modal :if={@live_action == :edit} id="user-modal" show on_cancel={JS.patch(~p"/people/#{@user}")}>
   <.live_component
-    module={Upload17Web.UserLive.FormComponent}
+    module={Upload17Web.UserLive.Edit}
     id={@user.id}
     title={@page_title}
     action={@live_action}

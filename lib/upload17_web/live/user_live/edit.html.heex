@@ -1,0 +1,100 @@
+<div>
+  <.header>
+    <%= @title %>
+    <:subtitle>Use this form to manage user records in your database.</:subtitle>
+  </.header>
+
+  <%= for former_entry <- assigns.user.photo_urls do %>
+    <article class="upload-entry w-[40%] inline-block">
+      <figure>
+        <%= case Upload17Web.UserLive.FileManager.exttype(former_entry) do %>
+          <% {:pic, image} -> %>
+            <img src={image} />
+          <% {:vid, video} -> %>
+            <video width="320" height="240" controls>
+              <source src={video} tpye="video/mp4" />
+            </video>
+          <% {:error, unknown_type} -> %>
+            <div class="error">
+              <p>Unknown file type</p>
+              <br />
+              <%= unknown_type %>
+            </div>
+        <% end %>
+      </figure>
+    </article>
+    <.link
+      phx-click={JS.push("delete", value: %{id: assigns.user.id})}
+      data-confirm="Do you realy want to delete that file?
+            All changes will be dismissed"
+    >
+      <button
+        type="button"
+        phx-click="delete-button"
+        phx-value-ref={former_entry}
+        phx-target={@myself}
+        aria-label="cancel"
+      >
+        &times;
+      </button>
+    </.link>
+  <% end %>
+
+  <%= for entry <- @uploads.photo.entries do %>
+    <article class="upload-entry w-[20%] inline-block">
+      <figure>
+        <%= for  err <- upload_errors(@uploads.photo, entry) do %>
+          <div class="alert alert-danger font-semibold text-red-700">
+            <%= Upload17Web.UserLive.FileManager.error_to_string(err) %>
+          </div>
+        <% end %>
+
+        <.live_img_preview entry={entry} />
+        <figcaption>
+          <%= entry.client_name %>
+        </figcaption>
+      </figure>
+
+      <progress value={entry.progress} max="100"><%= entry.progress %>%</progress>
+
+      <button
+        type="button"
+        phx-click="cancel-button"
+        phx-value-ref={entry.ref}
+        phx-target={@myself}
+        aria-label="cancel"
+      >
+        &times;
+      </button>
+    </article>
+  <% end %>
+
+  <.simple_form
+    :let={f}
+    for={@changeset}
+    id="user-form"
+    phx-target={@myself}
+    phx-change="validate"
+    phx-submit="save"
+  >
+    <.input field={{f, :name}} type="text" label="name" />
+    <!-- 1993 is a random number to symbolize that the upload limit is reached, because allow_upload.max_entries requires a positive integer 
+        Usage in Index.ex.max_uploads -->
+    <%= if @uploads.photo.max_entries != 1993 do %>
+      <.live_file_input upload={@uploads.photo} />
+    <% else %>
+      <.header>
+        <:subtitle>
+          You have already maxed your uploads. Please remove anyone you dont use anymore.
+        </:subtitle>
+      </.header>
+    <% end %>
+
+    <:actions>
+      <.button phx-disable-with="Saving...">Save User</.button>
+    </:actions>
+    <%= for err <- upload_errors(@uploads.photo) do %>
+      <p class="alert alert-danger font-semibold text-red-700"><%= Upload17Web.UserLive.FileManager.error_to_string(err) %></p>
+    <% end %>
+  </.simple_form>
+</div>
